@@ -60,6 +60,6 @@ while game.life > 0 or game.dead > 0:
   os.system('clear')
   game.test()
   print game
-  #time.sleep(1)
+  time.sleep(1)
   iterations += 1
 print "Total: ", iterations
