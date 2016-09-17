@@ -1,55 +1,71 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function
+
+import copy
 import random
 import itertools
 import time
 import os
 
+UNIX = True  # Change if using Windows
+
+clear = lambda: os.system('clear') if UNIX else os.system('cls')
+
+
 class GameOfLife(object):
-  def __init__(self, rows, cols):
-    self.rows = rows
-    self.cols = cols
 
-    row_life = lambda: [random.randint(0, 1) for n in range(self.cols)]
-    self.game = [row_life() for n in range(self.rows)]
+    def __init__(self, rows, cols):
 
-    self.life = 1
-    self.dead = 1
+        self.rows = rows
+        self.cols = cols
 
-  def __str__(self):
-    table = ''
-    for row in self.game:
-      for cell in row:
-        table += '@ ' if cell else '. '
-      table += '\n'
+        row_life = lambda: [random.randint(0, 1) for n in range(self.cols)]
+        self.game = [row_life() for n in range(self.rows)]
 
-    table += "Life: {0} Dead: {1}".format(self.life, self.dead)
-    return table
+        self.life = 1
+        self.dead = 1
 
+    def __str__(self):
 
-  def evaluate(self, row, col):
-    distance = list(set(itertools.permutations([-1, -1, 1, 1, 0], 2)))
-    into_table = lambda x, y: (x in range(self.rows) and y in range(self.cols))
+        table = ''
+        for row in self.game:
+            for cell in row:
+                table += '@ ' if cell else '. '
+            table += '\n'
 
-    total = 0
-    for r, c in distance:
-      if into_table(r + row, c + col):
-        total += 1 if self.game[r + row][c + col] else 0
-    return total
+        table += "Life: {0} Dead: {1}".format(self.life, self.dead)
+        return table
 
-  def test(self):
-    self.life = 0
-    self.dead = 0
-    for r in range(self.rows):
-      for c in range(self.cols):
-        total = self.evaluate(r, c)
+    def evaluate(self, row, col):
 
-        if (total < 2 or total > 3) and self.game[r][c]:
-          self.game[r][c] = 0
-          self.dead += 1
+        distance = list(set(itertools.permutations([-1, -1, 1, 1, 0], 2)))
+        into_table = lambda x, y: (x in range(self.rows) and y in range(self.cols))
 
-        elif total == 3 and not self.game[r][c]:
-          self.game[r][c] = 1
-          self.life += 1
+        total = 0
+        for r, c in distance:
+            if into_table(r + row, c + col):
+                total += self.game[r + row][c + col]
+        return total
 
+    def test(self):
+
+        gameaux = copy.deepcopy(self.game)
+        self.life = 0
+        self.dead = 0
+
+        for r in range(self.rows):
+            for c in range(self.cols):
+                total = self.evaluate(r, c)
+
+                if (total < 2 or total > 3) and gameaux[r][c]:
+                    gameaux[r][c] = 0
+                    self.dead += 1
+                elif total == 3 and not gameaux[r][c]:
+                    gameaux[r][c] = 1
+                    self.life += 1
+
+        self.game = copy.deepcopy(gameaux)
 
 rows, cols = int(input("Rows>> ")), int(input("Cols>> "))
 
@@ -57,9 +73,12 @@ game = GameOfLife(rows, cols)
 
 iterations = 0
 while game.life > 0 or game.dead > 0:
-  os.system('clear')
-  game.test()
-  print game
-  time.sleep(1)
-  iterations += 1
-print "Total: ", iterations
+    try:
+        clear()
+        game.test()
+        print(game)
+        time.sleep(1)
+        iterations += 1
+    except KeyboardInterrupt:
+        break
+print("Total: ", iterations)
